@@ -10,6 +10,8 @@ export const Persons = ({ persons, setPersons }) => {
     img: "https://bootdey.com/img/Content/avatar/avatar6.png"
   });
   const [isEditing, setIsEditing] = useState(false);
+  const [deleteId, setDeleteId] = useState(null);
+
 
   // handle son eventos
   const handleChange = (e) => {
@@ -20,6 +22,7 @@ export const Persons = ({ persons, setPersons }) => {
     }));
   }
 
+  // Metodo para editar
   const handleEdit = (id) => {
     // Establece el id de la persona que queremos editar
     setEditingId(id);
@@ -31,27 +34,54 @@ export const Persons = ({ persons, setPersons }) => {
     setEditedPerson({ ...personToEdit });
   }
 
+  // Metodo para guardar
   const handleSave = (e) => {
     setPersons(persons.map(person => person.id === editingId ? editedPerson : person));
     setEditingId(null);
-    setEditedPerson({ name: '', role: '', img: ''});
+    setEditedPerson({ name: '', role: '', img: '' });
     setIsEditing(false);
   }
+
+  // Metodo para eliminar
+  const handleDelete = (id) => {
+    setDeleteId(id);
+    /* Sin modal se usa lo de abajo */
+    // const updatedPersons = persons.filter(obj => obj.id !== id);
+    // setPersons(updatedPersons);
+  }
+
+  const confirmDelete = () => {
+    /* Con modal */
+    const updatedPersons = persons.filter(obj => obj.id !== deleteId);
+    setPersons(updatedPersons);
+    setDeleteId(null);
+  }
+
+  const cancelDelete = () => {
+    setDeleteId(null);
+  }
+
+  const handleCreate = () => {
+    setPersons([...persons, { id: persons.length + 1, ...editedPerson }]);
+    setEditedPerson({ name: '', role: '', img: '' });
+  }
+
 
   return (
     <div>
       <h2>IT Team</h2>
-      <div className='container d-flex justify-content-center '>
-        <div className='d-flex flex-row'>
+      <div className='container'>
+        <div className='row row-cols-1 row-cols-md-2 row-cols-lg-3 d-flex flex-wrap'>
           {persons.map((person) => {
             return (
-              <div>
+              <div key={person.id}>
                 <Person
-                  id={person.id}
+                  num={person.id}
                   name={person.name}
                   role={person.role}
                   img={person.img}
-                  funcion={() => handleEdit(person.id)}
+                  edit={() => handleEdit(person.id)}
+                  delete={handleDelete}
                 />
               </div>
             )
@@ -59,7 +89,8 @@ export const Persons = ({ persons, setPersons }) => {
         </div>
       </div>
       <div className='mt-4'>
-        <h2>Modificar datos</h2>
+        <h2>{isEditing ? 'Modificar persona' : 'Crear persona'}</h2>
+
         <div className='container text-center'>
           <div className='row justify-content-md-center'>
             <div className='col-8'>
@@ -74,12 +105,41 @@ export const Persons = ({ persons, setPersons }) => {
                 placeholder='Url de la imagen' value={editedPerson.img} onChange={handleChange} />
             </div>
           </div>
-          <div className='mt-2'>
-            <button className='btn btn-primary' onClick={handleSave}>
-              Guardar
+
+          <div className='mt-4'>
+            <button className='btn btn-primary' onClick={isEditing ? handleSave : handleCreate}>
+              {isEditing ? 'Guardar' : 'Agregar'}
             </button>
           </div>
-        </div>  
+        </div>
+      </div>
+
+      {/* Modal */}
+      <div id="deleteModal" className='modal fade' tabIndex='-1'>
+        <div className='modal-dialog'>
+          <div className='modal-content'>
+            <div className='modal-header'>
+              <h3 className='modal-title'>Confirmar eliminación</h3>
+              <button type='button' className='btn-close' data-bs-dismiss="modal"
+                aria-label='close' onClick={cancelDelete}>
+
+              </button>
+            </div>
+            <div className='modal-body'>
+              <p>¿Estás seguro de eliminar a {persons.find(obj => obj.id === deleteId)?.name} ?</p>
+            </div>
+            <div className='modal-footer'>
+              <button type='button' className='btn btn-secondary'
+                data-bs-dismiss="modal" onClick={cancelDelete}>
+                Cancelar
+              </button>
+              <button type='button' className='btn btn-danger'
+                data-bs-dismiss="modal" onClick={confirmDelete}>
+                Eliminar
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   )

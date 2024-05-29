@@ -1,4 +1,5 @@
 import './App.css';
+import Calculadora from './components/Calculadora';
 import { Persons } from './components/Persons';
 import { useState } from 'react';
 
@@ -29,6 +30,9 @@ function App() {
     <div className='App'>
       <div className='container'>
         <Persons persons={persons} setPersons={setPersons} />
+        <hr />
+        <br />
+        <Calculadora />
       </div>
     </div>
   );
